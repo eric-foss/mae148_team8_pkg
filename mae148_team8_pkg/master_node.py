@@ -12,10 +12,10 @@ class MasterNode(Node):
 
     def __init__(self):
         super().__init__('master_node')
+        self.get_logger().info('Initialized Node')
 
 
-
-	#Motor Publishers/Subscribers
+    	#Motor Publishers/Subscribers
         self.motor_publisher_ = self.create_publisher(Bool, 'motor_status', 10)
         self.motor_publisher_.publish(self.motor_on)
         self.completion_subscription_ = self.create_subscription(
@@ -43,6 +43,7 @@ class MasterNode(Node):
         self.lat = msg.latitude
         self.long = msg.longitude
         self.alt = msg.altitude
+        self.get_logger().info('Test')
         self.get_logger().info('Latitude: %.2f, Longitude %.2f, Altitude, %.2f', self.lat, self.long, self.alt)
 
 
