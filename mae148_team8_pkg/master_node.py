@@ -32,7 +32,7 @@ class MasterNode(Node):
             10)
 
         #VESC Publisher
-        self.vesc_publisher_ = self.create_publisher(Twist, 'cmd_vel', self.vesc_callback, 10)
+        self.vesc_publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
 
 
     def completion_callback(self, msg):
@@ -44,6 +44,7 @@ class MasterNode(Node):
         self.long = msg.longitude
         self.alt = msg.altitude
         self.get_logger().info('Latitude: %.2f, Longitude %.2f, Altitude, %.2f', self.lat, self.long, self.alt)
+
 
 
 
