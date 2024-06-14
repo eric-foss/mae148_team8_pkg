@@ -35,7 +35,7 @@ class HitchNode(Node):
         
 
     def cart_callback(self, msg):
-        if msg.data:
+        if msg.data == True:
             self.get_logger().info('Sending Motor Rotate Request')
             self.motor_publisher_.publish(self.motor_on)
         else: #LATCH
