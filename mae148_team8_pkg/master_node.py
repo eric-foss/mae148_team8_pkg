@@ -45,8 +45,7 @@ class MasterNode(Node):
         self.lat = msg.latitude
         self.long = msg.longitude
         self.alt = msg.altitude
-        self.get_logger().info('Latitude: %.2f, Longitude %.2f, Altitude, %.2f', self.lat, self.long, self.alt)
-
+        self.get_logger().info(f'Latitude: {self.lat:.2f}, Longitude: {self.long:.2f}, Altitude: {self.alt:.2f}')
 
 
 
