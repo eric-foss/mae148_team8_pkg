@@ -87,7 +87,7 @@ class GPSNode(Node):
         #eb1:(32.881275,-117.235466)
         #geisel steps:(32.881118,-117.235901)
         #
-        goal_loc=(32.881118,-117.235901)
+        goal_loc=(32.881275,-117.235466)
         if self.startmov_bool and not self.stop_drop_roll_bool:
             self.counter+=1
             lat = msg.latitude
