@@ -19,6 +19,7 @@ class MasterNode(Node):
 
     	#Motor Publishers/Subscribers
         self.motor_publisher_ = self.create_publisher(Bool, 'motor_status', 10)
+        self.get_logger().info('Sending Motor Rotate Request')
         self.motor_publisher_.publish(self.motor_on)
         self.cart_subscription_ = self.create_subscription(
             Bool,
@@ -40,6 +41,7 @@ class MasterNode(Node):
     def cart_callback(self, msg):
         
         if msg.data:
+            self.get_logger().info('Sending Motor Rotate Request')
             self.motor_publisher_.publish(self.motor_on)
         else:
             self.motor_on.data = False
