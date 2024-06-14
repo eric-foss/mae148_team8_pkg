@@ -23,7 +23,7 @@ setup(
 	    'hitch_node = mae148_team8_pkg.hitch_node:main',
         'dispense_node = mae148_team8_pkg.dispense_node:main',
         'forward_node = mae148_team8_pkg.forward_node:main'
-        'gps_node=mae148_team8_pkg.gps_node:main'
+        'gps_node = mae148_team8_pkg.gps_node:main'
         ],
     },
 )
