@@ -9,9 +9,10 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 class HitchNode(Node):
 
     motor_on = Bool()
+    success_msg = Bool()
     motor_on.data = True
+    success_msg.data = False
 
-    mode = 1
 
     def __init__(self):
         #Initialize Node
@@ -28,6 +29,10 @@ class HitchNode(Node):
             self.cart_callback,
             10)
 
+        #Successful Latch Publisher
+        self.success_publisher_ = self.create_publisher(Bool, 'successful_latch', 10);
+        self.success_publisher_.publish(self.success_msg)
+        
 
     def cart_callback(self, msg):
         if msg.data:
@@ -35,7 +40,9 @@ class HitchNode(Node):
             self.motor_publisher_.publish(self.motor_on)
         else: #LATCH
             self.motor_on.data = False
-            self.mode = 2
+            self.success_msg.data = True
+            self.success_publisher_.publish(self.success_msg)
+            
 
 
 
