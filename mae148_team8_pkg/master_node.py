@@ -11,28 +11,28 @@ class MasterNode(Node):
 
 
     def __init__(self):
-        super().__init__('master_node')
+       	super().__init__('master_node')
 
 
 
 	#Motor Publishers/Subscribers
-	self.motor_publisher_ = self.create_publisher(Bool, 'motor_status', 10)
-	self.motor_publisher_.publish(self.motor_on)
-	self.completion_subscription_ = self.create_subscription(
-	    Empty,
-	    'operation_complete',
-	    self.completion_callback,
-	    10)
+        self.motor_publisher_ = self.create_publisher(Bool, 'motor_status', 10)
+        self.motor_publisher_.publish(self.motor_on)
+        self.completion_subscription_ = self.create_subscription(
+            Empty,
+            'operation_complete',
+            self.completion_callback,
+            10)
 
-	#GPS Subscriber
-	self.gps_subscription_ = self.create_subscription(
-	    sensor_msgs/msg/NavSatFix,
-	    'fix',
-	    self.gps_callback,
-	    10)
+        #GPS Subscriber
+        self.gps_subscription_ = self.create_subscription(
+            sensor_msgs/msg/NavSatFix,
+            'fix',
+            self.gps_callback,
+            10)
 
-	#VESC Publisher
-	self.vesc_publisher_ = self.create_publisher(geometry_msgs/msg/Twist, 'cmd_vel', self.vesc_callback, 10)
+        #VESC Publisher
+        self.vesc_publisher_ = self.create_publisher(geometry_msgs/msg/Twist, 'cmd_vel', self.vesc_callback, 10)
 
 
     def completion_callback(self, msg):
@@ -40,10 +40,10 @@ class MasterNode(Node):
         self.motor_on.data = False
 
     def gps_callback(self, msg):
-	self.lat = msg.latitude
-	self.long = msg.longitude
-	self.alt = msg.altitude
-	self.get_logger().info('Latitude: %.2f, Longitude %.2f, Altitude, %.2f', self.lat, self.long, self.alt)
+        self.lat = msg.latitude
+        self.long = msg.longitude
+        self.alt = msg.altitude
+        self.get_logger().info('Latitude: %.2f, Longitude %.2f, Altitude, %.2f', self.lat, self.long, self.alt)
 
 
 
