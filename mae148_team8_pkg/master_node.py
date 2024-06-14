@@ -26,13 +26,13 @@ class MasterNode(Node):
 
         #GPS Subscriber
         self.gps_subscription_ = self.create_subscription(
-            sensor_msgs/msg/NavSatFix,
+            NavSatFix,
             'fix',
             self.gps_callback,
             10)
 
         #VESC Publisher
-        self.vesc_publisher_ = self.create_publisher(geometry_msgs/msg/Twist, 'cmd_vel', self.vesc_callback, 10)
+        self.vesc_publisher_ = self.create_publisher(Twist, 'cmd_vel', self.vesc_callback, 10)
 
 
     def completion_callback(self, msg):
