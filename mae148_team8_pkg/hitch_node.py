@@ -6,16 +6,17 @@ from geometry_msgs.msg import Twist
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 
 
-class MasterNode(Node):
+class HitchNode(Node):
 
     motor_on = Bool()
     motor_on.data = True
 
+    mode = 1
 
     def __init__(self):
-        super().__init__('master_node')
+        #Initialize Node
+        super().__init__('hitch_node')
         self.get_logger().info('Initialized Node')
-
 
     	#Motor Publishers/Subscribers
         self.motor_publisher_ = self.create_publisher(Bool, 'motor_status', 10)
@@ -27,36 +28,20 @@ class MasterNode(Node):
             self.cart_callback,
             10)
 
-        #GPS Subscriber
-        self.gps_subscription_ = self.create_subscription(
-            NavSatFix,
-            'fix',
-            self.gps_callback,
-            QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
-
-        #VESC Publisher
-        self.vesc_publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
-
 
     def cart_callback(self, msg):
-        
         if msg.data:
             self.get_logger().info('Sending Motor Rotate Request')
             self.motor_publisher_.publish(self.motor_on)
-        else:
+        else: #LATCH
             self.motor_on.data = False
-
-    def gps_callback(self, msg):
-        self.lat = msg.latitude
-        self.long = msg.longitude
-        self.alt = msg.altitude
-        self.get_logger().info(f'Latitude: {self.lat:.2f}, Longitude: {self.long:.2f}, Altitude: {self.alt:.2f}')
+            self.mode = 2
 
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = MasterNode()
+    node = HitchNode()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
