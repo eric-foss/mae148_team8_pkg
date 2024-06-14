@@ -20,10 +20,10 @@ class MasterNode(Node):
     	#Motor Publishers/Subscribers
         self.motor_publisher_ = self.create_publisher(Bool, 'motor_status', 10)
         self.motor_publisher_.publish(self.motor_on)
-        self.completion_subscription_ = self.create_subscription(
-            Empty,
-            'operation_complete',
-            self.completion_callback,
+        self.cart_subscription_ = self.create_subscription(
+            Bool,
+            'cart_status',
+            self.cart_callback,
             10)
 
         #GPS Subscriber
@@ -37,9 +37,12 @@ class MasterNode(Node):
         self.vesc_publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
 
 
-    def completion_callback(self, msg):
-        self.get_logger().info('Received completion signal')
-        self.motor_on.data = False
+    def cart_callback(self, msg):
+        
+        if msg.data:
+            self.motor_publisher_.publish(self.motor_on)
+        else:
+            self.motor_on.data = False
 
     def gps_callback(self, msg):
         self.lat = msg.latitude
