@@ -20,8 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-	    'hitch_node = mae148_team8_pkg.hitch_node:main',
-        'gps_node = mae148_team8_pkg:gps_node:main',
+	    'hitch_node = mae148_team8_pkg.hitch_node:main'
         ],
     },
 )
