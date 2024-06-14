@@ -11,7 +11,7 @@ class MasterNode(Node):
 
 
     def __init__(self):
-       	super().__init__('master_node')
+        super().__init__('master_node')
 
 
 
