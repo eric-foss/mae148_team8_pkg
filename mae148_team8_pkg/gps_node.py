@@ -5,9 +5,9 @@ from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import Twist
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 import random
-from workspace3 import Workspace
-from ROS2.coord_handling import initialize_wksp_obs,LonLat_To_XY,XY_To_LonLat
-import shapely
+from scripts.workspace3 import Workspace
+from scripts.coord_handling import initialize_wksp_obs,LonLat_To_XY,XY_To_LonLat
+from scripts.steering_guidance import getzangrot
 
 
 class GPSNode(Node):
@@ -24,6 +24,11 @@ class GPSNode(Node):
         servo_message + 'Delivering Right Package'
     else:
         servo_message + 'Delivering Both Packages'
+
+    master = initialize_wksp_obs['../scripts/test3.txt']
+    workspace = master['wksp']
+    origin = master['origin']
+    obs_dict = master['obs_dict']
     
     
     def __init__(self):
@@ -59,6 +64,11 @@ class GPSNode(Node):
         self.alt = msg.altitude
         self.get_logger().info(f'Latitude: {self.lat:.2f}, Longitude: {self.long:.2f}, Altitude: {self.alt:.2f}')
     
+    def getPath(self,start_location,goal_location):
+        ws = Workspace(self.workspace,self.obs_dict,start_location,goal_location,boundary_type = 1)
+        return ws.path_coords
+    
+
 
 def main(args=None):
     rclpy.init(args=args)
