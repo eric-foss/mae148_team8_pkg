@@ -6,8 +6,10 @@ from geometry_msgs.msg import Twist
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 import random
 from workspace3 import Workspace
-from ROS2.coord_handling import initialize_wksp_obs,LonLat_To_XY,XY_To_LonLat
+from scripts.coord_handling import initialize_wksp_obs,LonLat_To_XY,XY_To_LonLat
 import shapely
+from scripts.transform import PIDController
+from scripts.path import CTE
 
 
 class GPSNode(Node):
@@ -15,6 +17,7 @@ class GPSNode(Node):
     servo_command = Int32()
     servo_command.data = random.randint(0,3)
     servo_message = ''
+
     
     if servo_command.data == 0:
         servo_message + 'Standing by at Destination'
@@ -29,6 +32,13 @@ class GPSNode(Node):
     def __init__(self):
         super().__init__('gps_node')
         self.get_logger().info('Initialized Node')
+        P=0.075
+        I=0.01
+        D=0.15 
+        self.PID=PIDController(P,I,D)
+        look_ahead=1
+        look_behind=0
+        self.CTE=CTE(look_ahead,look_behind)
 
         #Hitch Subscriber
         self.hitch_subscription_ = self.create_subscription(
@@ -58,6 +68,7 @@ class GPSNode(Node):
         self.long = msg.longitude
         self.alt = msg.altitude
         self.get_logger().info(f'Latitude: {self.lat:.2f}, Longitude: {self.long:.2f}, Altitude: {self.alt:.2f}')
+
     
 
 def main(args=None):
