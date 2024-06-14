@@ -3,6 +3,8 @@ from rclpy.node import Node
 from std_msgs.msg import Bool, Empty
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import Twist
+from rclpy.qos import ReliabilityPolicy, QoSProfile
+
 
 class MasterNode(Node):
 
@@ -29,7 +31,7 @@ class MasterNode(Node):
             NavSatFix,
             'fix',
             self.gps_callback,
-            10)
+            QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
 
         #VESC Publisher
         self.vesc_publisher_ = self.create_publisher(Twist, 'cmd_vel', 10)
@@ -43,7 +45,6 @@ class MasterNode(Node):
         self.lat = msg.latitude
         self.long = msg.longitude
         self.alt = msg.altitude
-        self.get_logger().info('Test')
         self.get_logger().info('Latitude: %.2f, Longitude %.2f, Altitude, %.2f', self.lat, self.long, self.alt)
 
 
