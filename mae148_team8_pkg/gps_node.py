@@ -8,12 +8,12 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(sys.path[0]), 'scripts'))
 
-from scripts.workspace3 import Workspace
-from scripts.coord_handling import initialize_wksp_obs,LonLat_To_XY,XY_To_LonLat
+from workspace3 import Workspace
+from coord_handling import initialize_wksp_obs,LonLat_To_XY,XY_To_LonLat
 import shapely
-from scripts.transform import PIDController
-from scripts.path import CTE
-from scripts.steering_guidance import getzangrot
+from transform import PIDController
+from path import CTE
+from steering_guidance import getzangrot
 
 
 class GPSNode(Node):
