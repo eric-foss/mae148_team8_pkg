@@ -3,294 +3,7 @@ import math
 import logging
 import pathlib
 import numpy
-from PIL import Image, ImageDraw
-
-from transform import PIDController
-from utils import norm_deg, dist, deg2rad, arr_to_img, is_number_type
-
-
-class AbstractPath:
-    def __init__(self, min_dist=1.):
-        self.path = []  # list of (x,y) tuples
-        self.min_dist = min_dist
-        self.x = math.inf
-        self.y = math.inf
-
-    def run(self, recording, x, y):
-        if recording:
-            d = dist(x, y, self.x, self.y)
-            if d > self.min_dist:
-                logging.info(f"path point ({x},{y})")
-                self.path.append((x, y))
-                self.x = x
-                self.y = y
-        return self.path
-
-    def length(self):
-        return len(self.path)
-
-    def is_empty(self):
-        return 0 == self.length()
-
-    def is_loaded(self):
-        return not self.is_empty()
-
-    def get_xy(self):
-        return self.path
-
-    def reset(self):
-        self.path = []
-        return True
-
-    def save(self, filename):
-        return False
-
-    def load(self, filename):
-        return False
-
-
-class CsvPath(AbstractPath):
-    def __init__(self, min_dist=1.):
-        super().__init__(min_dist)
-
-    def save(self, filename):
-        if self.length() > 0:
-            with open(filename, 'w') as outfile:
-                for (x, y) in self.path:
-                    outfile.write(f"{x}, {y}\n")
-            return True
-        else:
-            return False
-
-    def load(self, filename):
-        path = pathlib.Path(filename)
-        if path.is_file():
-            with open(filename, "r") as infile:
-                self.path = []
-                for line in infile:
-                    xy = [float(i.strip()) for i in line.strip().split(sep=",")]
-                    self.path.append((xy[0], xy[1]))
-            return True
-        else:
-            logging.info(f"File '{filename}' does not exist")
-            return False
-
-        self.recording = False
-
-class CsvThrottlePath(AbstractPath):
-    def __init__(self, min_dist: float = 1.0) -> None:
-        super().__init__(min_dist)
-        self.throttles = []
-
-    def run(self, recording: bool, x: float, y: float, throttle: float) -> tuple:
-        if recording:
-            d = dist(x, y, self.x, self.y)
-            if d > self.min_dist:
-                logging.info(f"path point: ({x},{y}) throttle: {throttle}")
-                self.path.append((x, y))
-                self.throttles.append(throttle)
-                self.x = x
-                self.y = y
-        return self.path, self.throttles
-
-    def reset(self) -> bool:
-        super().reset()
-        self.throttles = []
-        return True
-
-    def save(self, filename: str) -> bool:
-        if self.length() > 0:
-            with open(filename, 'w') as outfile:
-                for (x, y), v in zip(self.path, self.throttles):
-                    outfile.write(f"{x}, {y}, {v}\n")
-            return True
-        else:
-            return False
-
-    def load(self, filename: str) -> bool:
-        path = pathlib.Path(filename)
-        if path.is_file():
-            with open(filename, "r") as infile:
-                self.path = []
-                for line in infile:
-                    xy = [float(i.strip()) for i in line.strip().split(sep=",")]
-                    self.path.append((xy[0], xy[1]))
-                    self.throttles.append(xy[2])
-            return True
-        else:
-            logging.warning(f"File '{filename}' does not exist")
-            return False
-
-
-class RosPath(AbstractPath):
-    def __init__(self, min_dist=1.):
-        super().__init__(self, min_dist)
-
-    def save(self, filename):
-        outfile = open(filename, 'wb')
-        pickle.dump(self.path, outfile)
-        return True
-
-    def load(self, filename):
-        infile = open(filename, 'rb')
-        self.path = pickle.load(infile)
-        self.recording = False
-        return True
-
-class PImage(object):
-    def __init__(self, resolution=(500, 500), color="white", clear_each_frame=False):
-        self.resolution = resolution
-        self.color = color
-        self.img = Image.new('RGB', resolution, color=color)
-        self.clear_each_frame = clear_each_frame
-
-    def run(self):
-        if self.clear_each_frame:
-            self.img = Image.new('RGB', self.resolution, color=self.color)
-
-        return self.img
-
-
-class OriginOffset(object):
-    '''
-    Use this to set the car back to the origin without restarting it.
-    '''
-
-    def __init__(self, debug=False):
-        self.debug = debug
-        self.ox = 0.0
-        self.oy = 0.0
-        self.last_x = 0.0
-        self.last_y = 0.0
-        self.reset = None
-
-    def run(self, x, y, closest_pt):
-        """
-        :param x: is current horizontal position
-        :param y: is current vertical position
-        :param closest_pt: is current cte/closest_pt
-        :return: translated x, y and new index of closest point in path.
-        """
-        if is_number_type(x) and is_number_type(y):
-            # if origin is None, set it to current position
-            if self.reset:
-                self.ox = x
-                self.oy = y
-
-            self.last_x = x
-            self.last_y = y
-        else:
-            logging.debug("OriginOffset ignoring non-number")
-
-        # translate the given position by the origin
-        pos = (0, 0)
-        if self.last_x is not None and self.last_y is not None and self.ox is not None and self.oy is not None:
-            pos = (self.last_x - self.ox, self.last_y - self.oy)
-        if self.debug:
-            logging.info(f"pos/x = {pos[0]}, pos/y = {pos[1]}")
-
-        # reset the starting search index for cte algorithm
-        if self.reset:
-            if self.debug:
-                logging.info(f"cte/closest_pt = {closest_pt} -> None")
-            closest_pt = None
-
-        # clear reset latch
-        self.reset = False
-
-        return pos[0], pos[1], closest_pt
-
-    def set_origin(self, x, y):
-        logging.info(f"Resetting origin to ({x}, {y})")
-        self.ox = x
-        self.oy = y
-
-    def reset_origin(self):
-        """
-        Reset the origin with the next value that comes in
-        """
-        self.ox = None
-        self.oy = None
-        self.reset = True
-
-    def init_to_last(self):
-        self.set_origin(self.last_x, self.last_y)
-
-
-class PathPlot(object):
-    '''
-    draw a path plot to an image
-    '''
-    def __init__(self, scale=1.0, offset=(0., 0.0)):
-        self.scale = scale
-        self.offset = offset
-
-    def plot_line(self, sx, sy, ex, ey, draw, color):
-        '''
-        scale dist so that max_dist is edge of img (mm)
-        and img is PIL Image, draw the line using the draw ImageDraw object
-        '''
-        draw.line((sx,sy, ex, ey), fill=color, width=1)
-
-    def run(self, img, path):
-        
-        if type(img) is numpy.ndarray:
-            stacked_img = numpy.stack((img,)*3, axis=-1)
-            img = arr_to_img(stacked_img)
-
-        if path:
-            draw = ImageDraw.Draw(img)
-            color = (255, 0, 0)
-            for iP in range(0, len(path) - 1):
-                ax, ay = path[iP]
-                bx, by = path[iP + 1]
-
-                #
-                # y increases going north, so handle this with scale
-                #
-                self.plot_line(ax * self.scale + self.offset[0],
-                            ay * -self.scale + self.offset[1],
-                            bx * self.scale + self.offset[0],
-                            by * -self.scale + self.offset[1],
-                            draw,
-                            color)
-        return img
-
-
-class PlotCircle(object):
-    '''
-    draw a circle plot to an image
-    '''
-    def __init__(self,  scale=1.0, offset=(0., 0.0), radius=4, color = (0, 255, 0)):
-        self.scale = scale
-        self.offset = offset
-        self.radius = radius
-        self.color = color
-
-    def plot_circle(self, x, y, rad, draw, color, width=1):
-        '''
-        scale dist so that max_dist is edge of img (mm)
-        and img is PIL Image, draw the circle using the draw ImageDraw object
-        '''
-        sx = x - rad
-        sy = y - rad
-        ex = x + rad
-        ey = y + rad
-
-        draw.ellipse([(sx, sy), (ex, ey)], fill=color)
-
-
-    def run(self, img, x, y):
-        draw = ImageDraw.Draw(img)
-        self.plot_circle(x * self.scale + self.offset[0],
-                        y * -self.scale + self.offset[1],  # y increases going north
-                        self.radius,
-                        draw, 
-                        self.color)
-
-        return img
-
-from mae148_team8_pkg.la import Line3D, Vec3
+import time
 
 class CTE(object):
 
@@ -431,28 +144,184 @@ class CTE(object):
             logging.info(f"no nearest point to ({x},{y}))")
         return cte, i
 
+class Vec3(object):
+    def __init__(self, x=0.0, y=0.0, z=0.0):
+        self.x = x
+        self.y = y
+        self.z = z
 
-class PID_Pilot(object):
+    def __add__(self, other):
+        return self.add(other)
 
-    def __init__(
-            self,
-            pid: PIDController,
-            throttle: float,
-            use_constant_throttle: bool = False,
-            min_throttle: float = None) -> None:
-        self.pid = pid
-        self.throttle = throttle
-        self.use_constant_throttle = use_constant_throttle
-        self.variable_speed_multiplier = 1.0
-        self.min_throttle = min_throttle if min_throttle is not None else throttle
+    def __sub__(self, other):
+        return self.subtract(other)
 
-    def run(self, cte: float, throttles: list, closest_pt_idx: int) -> tuple:
-        steer = self.pid.run(cte)
-        if self.use_constant_throttle or throttles is None or closest_pt_idx is None:
-            throttle = self.throttle
-        elif throttles[closest_pt_idx] * self.variable_speed_multiplier < self.min_throttle:
-            throttle = self.min_throttle
-        else:
-            throttle = throttles[closest_pt_idx] * self.variable_speed_multiplier
-        logging.info(f"CTE: {cte} steer: {steer} throttle: {throttle}")
-        return steer, throttle
+    def __mul__(self, other):
+        return self.multiply(other)
+
+    def __div__(self, other):
+        return self.multiply(other.reciprocal())
+
+    def __neg__(self):
+        return self.scaled(-1.0)
+
+    def __iadd__(self, other): #+= other
+        self = self.add(other)
+        return self
+
+    def mag(self):
+        return math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+        
+    def scale(self, s):
+        self.x *= s
+        self.y *= s
+        self.z *= s
+        return self
+
+    def scaled(self, s):
+        r = Vec3()
+        r.x = self.x * s
+        r.y = self.y * s
+        r.z = self.z * s
+        return r
+        
+    def normalize(self):
+        m = self.mag()
+        self.scale(1.0 / m)
+        return self
+
+    def normalized(self):
+        m = self.mag()
+        v = Vec3(self.x, self.y, self.z)
+        if m > 0:
+            v.scale(1.0 / m)
+        return v
+
+    def subtract(self, v):
+        r = Vec3()
+        r.x = self.x - v.x
+        r.y = self.y - v.y
+        r.z = self.z - v.z
+        return r
+        
+    def add(self, v):
+        r = Vec3()
+        r.x = self.x + v.x
+        r.y = self.y + v.y
+        r.z = self.z + v.z
+        return r
+        
+    def multiply(self, v):
+        r = Vec3()
+        r.x = self.x * v.x
+        r.y = self.y * v.y
+        r.z = self.z * v.z
+        return r
+        
+    def dot(self, v):
+        return (self.x * v.x + self.y * v.y + self.z * v.z)
+        
+    def cross(self, v):
+        r = Vec3()
+        r.x = (self.y * v.z) - (self.z * v.y)
+        r.y = (self.z * v.x) - (self.x * v.z)
+        r.z = (self.x * v.y) - (self.y * v.x)
+        return r
+    
+    def dist(self, v):
+        r = self.subtract(v)
+        return r.mag()
+
+    def reciprocal(self):
+        r = Vec3()
+        if(self.x != 0.0):
+            r.x = 1.0 / self.x
+        if(self.y != 0.0):
+            r.y = 1.0 / self.y
+        if(self.z != 0.0):
+            r.z = 1.0 / self.z
+        return r
+        
+    def unit_angle(self, v):
+        #note! requires normalized vectors as input
+        return math.acos(self.dot(v))
+ 
+class Line3D(object):
+
+    def __init__(self, a, b):
+        self.origin = a
+        self.dir = a - b
+        self.dir.normalize()
+
+    def vector_to(self, p):
+        delta = self.origin - p
+        dot = delta.dot(self.dir)
+        return self.dir.scaled(dot) - delta
+
+class PIDController:
+    """ Performs a PID computation and returns a control value.
+        This is based on the elapsed time (dt) and the current value of the process variable
+        (i.e. the thing we're measuring and trying to change).
+        https://github.com/chrisspen/pid_controller/blob/master/pid_controller/pid.py
+    """
+
+    def __init__(self, p=0, i=0, d=0, debug=False):
+
+        # initialize gains
+        self.Kp = p
+        self.Ki = i
+        self.Kd = d
+
+        # The value the controller is trying to get the system to achieve.
+        self.target = 0
+
+        # initialize delta t variables
+        self.prev_tm = time.time()
+        self.prev_err = 0
+        self.error = None
+        self.totalError = 0
+
+        # initialize the output
+        self.alpha = 0
+
+        # debug flag (set to True for console output)
+        self.debug = debug
+
+    def run(self, err):
+        curr_tm = time.time()
+
+        self.difError = err - self.prev_err
+
+        # Calculate time differential.
+        dt = curr_tm - self.prev_tm
+
+        # Initialize output variable.
+        curr_alpha = 0
+
+        # Add proportional component.
+        curr_alpha += -self.Kp * err
+
+        # Add integral component.
+        curr_alpha += -self.Ki * (self.totalError * dt)
+
+        # Add differential component (avoiding divide-by-zero).
+        if dt > 0:
+            curr_alpha += -self.Kd * ((self.difError) / float(dt))
+
+        # Maintain memory for next loop.
+        self.prev_tm = curr_tm
+        self.prev_err = err
+        self.totalError += err
+
+        # Update the output
+        self.alpha = curr_alpha
+
+        if (self.debug):
+            print('PID err value:', round(err, 4))
+            print('PID output:', round(curr_alpha, 4))
+
+        return curr_alpha
+    
+def dist(x1, y1, x2, y2):
+    return math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
+
