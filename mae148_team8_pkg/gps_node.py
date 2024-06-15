@@ -8,6 +8,7 @@ from rclpy.qos import ReliabilityPolicy, QoSProfile
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(sys.path[0]), 'scripts'))
 
+from la import Vec2
 from workspace3 import Workspace
 from coord_handling import initialize_wksp_obs,LonLat_To_XY,XY_To_LonLat
 import shapely
