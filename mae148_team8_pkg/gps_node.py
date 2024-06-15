@@ -37,7 +37,7 @@ class GPSNode(Node):
     else:
         servo_message + 'Delivering Both Packages'
 
-    master = initialize_wksp_obs('.test3.txt')
+    master = initialize_wksp_obs('test3.txt')
     workspace = master['wksp']
     origin = master['origin']
     obs_dict = master['obs_dict']
