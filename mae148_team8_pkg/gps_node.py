@@ -5,10 +5,9 @@ from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import Twist
 from rclpy.qos import ReliabilityPolicy, QoSProfile
 #add the path to the reference scripts
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(sys.path[0]), 'scripts'))
-
-from la import Vec2
+#import sys, os
+#sys.path.append(os.path.join(os.path.dirname(sys.path[0]), 'scripts'))
+#sys.path.append(os.path.join(sys.path[0], 'scripts'))
 from workspace3 import Workspace
 from coord_handling import initialize_wksp_obs,LonLat_To_XY,XY_To_LonLat
 import shapely

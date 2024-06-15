@@ -1,5 +1,5 @@
 import pyproj 
-from path import CTE
+from mae148_team8_pkg.path import CTE
 from transform import PIDController
 #ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 

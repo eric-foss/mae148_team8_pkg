@@ -5,7 +5,7 @@ import shapely
 import matplotlib as plt
 import shapely.ops
 import shapely.plotting
-from coord_handling import initialize_wksp_obs
+from mae148_team8_pkg.coord_handling import initialize_wksp_obs
 
 #Pick a location for the car to navigate towards
 #Need to be converted to UTM

@@ -290,7 +290,7 @@ class PlotCircle(object):
 
         return img
 
-from la import Line3D, Vec3
+from mae148_team8_pkg.la import Line3D, Vec3
 
 class CTE(object):
 
