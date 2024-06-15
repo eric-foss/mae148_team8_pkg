@@ -20,7 +20,7 @@ from steering_guidance import getzangrot
 class GPSNode(Node):
 
     servo_command = Int32()
-    servo_command.data = random.randint(0,3)
+    
     servo_message = ''
     startmov_bool=False
     initial_bool=True
