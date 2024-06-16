@@ -198,9 +198,10 @@ class Workspace():
     def extractPathCoords(self,nodes,path):
         coords = []
         for point in path:
-             x = nodes[point].x
-             y = nodes[point].y
-             coords.append((x,y))
+             #x = nodes[point].x #change by AJM remove .x and .y
+             #y = nodes[point].y
+             #coords.append((x,y))
+             coords.append(nodes[point])
         return coords
 
     def getCurrentPosition(self,tuple_xy):
