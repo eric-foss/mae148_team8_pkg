@@ -101,8 +101,7 @@ class GPSNode(Node):
             if self.initial_bool:
                 self.initial_bool=False
                 start_loc=shapely.Point(currPoi)
-                self.get_logger().info(start_loc)
-                self.get_logger().info(goal_loc)
+                self.get_logger().info('start loc: '+str(currPoi[0])+','+str(currPoi[1]))
                 our_ws=self.getPath(start_loc,goal_loc)
                 path=our_ws.path_coords
             zang=getzangrot(path,currPoi,self.PID,self.CTE)
