@@ -198,14 +198,14 @@ class Workspace():
     def extractPathCoords(self,nodes,path):
         coords = []
         for point in path:
-             #x = nodes[point].x #change by AJM remove .x and .y
-             #y = nodes[point].y
-             #coords.append((x,y))
-             coords.append(nodes[point])
+             x = nodes[point].x 
+             y = nodes[point].y
+             coords.append((x,y))
+             #coords.append(nodes[point])
         return coords
 
     def getCurrentPosition(self,tuple_xy):
-        current_position = shapely.Point(tuple_xy)
+        current_position = shapely.Point(tuple_xy[0],tuple_xy[1])
         return current_position
     
     def isNearGoal(self,current_position_def,buffer=1):
