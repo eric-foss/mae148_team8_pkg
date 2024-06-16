@@ -201,7 +201,6 @@ class Workspace():
              x = nodes[point].x 
              y = nodes[point].y
              coords.append((x,y))
-             #coords.append(nodes[point])
         return coords
 
     def getCurrentPosition(self,tuple_xy):
