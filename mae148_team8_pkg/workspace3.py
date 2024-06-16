@@ -34,8 +34,8 @@ class Workspace():
         
         self.free_workspace = self.getFreeWorkspace(self.ws_rect,self.obs_union)
         self.triangles = self.getDecomposition(self.free_workspace)
-        self.start_location = shapely.Point(start_location[0],start_location[1])
-        self.goal_location =  shapely.Point(goal_location[0],goal_location[1])
+        self.start_location = start_location
+        self.goal_location =  goal_location
         self.buffer = buffer
         self.nodes,self.edges,self.adj_table,self.weights = self.getGraph(self.triangles,self.obs_union,self.start_location,self.goal_location,self.buffer)
         self.path = self.getBestFSPath(self.nodes,self.adj_table)
