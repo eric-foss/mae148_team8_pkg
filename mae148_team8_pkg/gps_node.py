@@ -107,11 +107,11 @@ class GPSNode(Node):
                 self.initial_bool=False
                 start_loc=currPoint
                 self.get_logger().info('start loc: '+str(currPoi[0])+','+str(currPoi[1]))
-                our_ws=self.getPath(start_loc,goal_loc)
-                self.path=our_ws.path_coords
+                self.our_ws=self.getPath(start_loc,goal_loc)
+                self.path=self.our_ws.path_coords
             
             zang=getzangrot(self.path,currPoi,self.PID,self.CTE)
-            if our_ws.isNearGoal(currPoint):
+            if self.our_ws.isNearGoal(currPoint):
                 self.speed.linear.x=0.0
                 self.speed.angular.z=0.0
                 self.stop_drop_roll_bool=True
