@@ -5,7 +5,8 @@ import shapely
 import matplotlib as plt
 import shapely.ops
 import shapely.plotting
-from mae148_team8_pkg.coord_handling import initialize_wksp_obs
+#from mae148_team8_pkg.coord_handling import initialize_wksp_obs
+from coord_handling import initialize_wksp_obs
 
 #Pick a location for the car to navigate towards
 #Need to be converted to UTM
@@ -217,13 +218,13 @@ class Workspace():
 
 if __name__ == "__main__":
     #Example Workspace
-    master = initialize_wksp_obs('test3.txt')
+    master = initialize_wksp_obs("test3.txt")
     workspace = master['wksp']
     origin = master['origin']
     obs_dict = master['obs_dict']
 
-    start_location = shapely.Point((-35,0))
-    goal_location = shapely.Point((90,7))
+    start_location = shapely.Point((-.185,-11))
+    goal_location = shapely.Point((0,0))
 
     current_position = (4,17)
 

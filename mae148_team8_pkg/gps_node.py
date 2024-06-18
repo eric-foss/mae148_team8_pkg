@@ -99,7 +99,7 @@ class GPSNode(Node):
             lat = msg.latitude
             long = msg.longitude
             alt=msg.altitude
-            self.get_logger().info(f'Latitude: {lat:.2f}, Longitude: {long:.2f}, Altitude: {alt:.2f}')
+            #self.get_logger().info(f'Latitude: {lat:.2f}, Longitude: {long:.2f}, Altitude: {alt:.2f}')
             currPoi=LonLat_To_XY(long,lat)
             currPoi=(currPoi[0]-origin[0],currPoi[1]-origin[1])
             currPoint=shapely.Point(currPoi[0],currPoi[1])

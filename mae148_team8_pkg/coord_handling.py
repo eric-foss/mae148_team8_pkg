@@ -13,8 +13,9 @@ def distance(Lat1, Lon1, Lat2, Lon2):
     return G.inv(Lon1, Lat1, Lon2, Lat2)[2]
 
 def initialize_wksp_obs(filename):
+    #filename="\\Users\\aaron\GitHub\\UCSD\\mae148_team8_pkg\\mae148_team8_pkg\\"+filename
     filename="/home/projects/ros2_ws/src/mae148_team8_pkg/mae148_team8_pkg/"+filename
-    with open(filename) as data:
+    with open(filename,"r") as data:
         coordsdict={}
         name=''
         long=0
