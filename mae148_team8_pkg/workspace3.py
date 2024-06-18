@@ -209,7 +209,8 @@ class Workspace():
     
     def isNearGoal(self,current_position_def,buffer=1):
         goal_position = self.nodes[-1]
-        if goal_position.buffer(buffer).instersects(current_position_def):
+        polygoal=goal_position.buffer(buffer)
+        if shapely.instersects(current_position_def,polygoal):
             return True
         else:
             return False

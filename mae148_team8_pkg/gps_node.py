@@ -87,10 +87,13 @@ class GPSNode(Node):
 
     def gps_callback(self, msg):
         #location list:
-        #eb1:(32.881275,-117.235466)
-        #geisel steps:(32.881118,-117.235901)
+        #origin:(477974.31,3638149.78)
+        #eb1:(0,0)
+        #geisel steps:(477933.58,3638132.46)
+        #geisel steps
         #
-        goal_loc=shapely.Point(32.881275,-117.235466)
+        origin=(477974.31,3638149.78)
+        goal_loc=shapely.Point(0,0)
         if self.startmov_bool and not self.stop_drop_roll_bool:
             self.counter+=1
             lat = msg.latitude
@@ -98,14 +101,16 @@ class GPSNode(Node):
             alt=msg.altitude
             self.get_logger().info(f'Latitude: {lat:.2f}, Longitude: {long:.2f}, Altitude: {alt:.2f}')
             currPoi=LonLat_To_XY(long,lat)
+            currPoi=(currPoi[0]-origin[0],currPoi[1]-origin[1])
+            currPoint=shapely.Point(currPoi[0],currPoi[1])
             if self.initial_bool:
                 self.initial_bool=False
-                start_loc=shapely.Point(currPoi)
+                start_loc=currPoint
                 self.get_logger().info('start loc: '+str(currPoi[0])+','+str(currPoi[1]))
                 our_ws=self.getPath(start_loc,goal_loc)
                 path=our_ws.path_coords
             zang=getzangrot(path,currPoi,self.PID,self.CTE)
-            if our_ws.isNearGoal(currPoi):
+            if our_ws.isNearGoal(currPoint):
                 self.speed.linear.x=0
                 self.speed.angular.z=0
                 self.stop_drop_roll_bool=True
