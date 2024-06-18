@@ -104,7 +104,7 @@ class GPSNode(Node):
             currPoi=(currPoi[0]-origin[0],currPoi[1]-origin[1])
             currPoint=shapely.Point(currPoi[0],currPoi[1])
             self.get_logger().info(str(self.initial_bool))
-            if self.initial_bool:
+            if self.initial_bool or self.counter==1:
                 self.initial_bool=False
                 start_loc=currPoint
                 self.get_logger().info('start loc: '+str(currPoi[0])+','+str(currPoi[1]))
