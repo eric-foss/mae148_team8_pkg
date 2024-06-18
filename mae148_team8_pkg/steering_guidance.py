@@ -21,7 +21,7 @@ def getzangrot(pathcoords,currPoint,pid_class,cte_class):
     else:
         steering=alpha
 
-    return steering
+    return float(steering)
 
 
 

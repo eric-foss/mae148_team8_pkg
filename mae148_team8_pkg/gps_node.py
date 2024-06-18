@@ -111,13 +111,13 @@ class GPSNode(Node):
                 path=our_ws.path_coords
             zang=getzangrot(path,currPoi,self.PID,self.CTE)
             if our_ws.isNearGoal(currPoint):
-                self.speed.linear.x=0
-                self.speed.angular.z=0
+                self.speed.linear.x=0.0
+                self.speed.angular.z=0.0
                 self.stop_drop_roll_bool=True
                 self.servo1_publisher_.publish(True)
                 self.servo2_publisher_.publish(True)
             else:
-                self.speed.linear.x=1
+                self.speed.linear.x=1.0
                 self.speed.angular.z=zang
             self.speed_publisher_.publish(self.speed)
 
