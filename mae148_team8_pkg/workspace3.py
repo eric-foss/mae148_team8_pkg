@@ -223,8 +223,8 @@ if __name__ == "__main__":
     origin = master['origin']
     obs_dict = master['obs_dict']
 
-    start_location = shapely.Point((-.185,-11))
-    goal_location = shapely.Point((0,0))
+    start_location = shapely.Point((1.56,11.73))
+    goal_location = shapely.Point((1,1))
 
     current_position = (4,17)
 

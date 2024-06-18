@@ -119,7 +119,7 @@ class GPSNode(Node):
             else:
                 self.speed.linear.x=1.0
                 self.speed.angular.z=zang
-            self.speed_publisher_.publish(self.speed)
+            self.vesc_publisher_.publish(self.speed)
 
     def getPath(self,start_location,goal_location):
         ws = Workspace(self.workspace,self.obs_dict,start_location,goal_location,boundary_type = 1)
