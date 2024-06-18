@@ -22,7 +22,6 @@ class GPSNode(Node):
     
     servo_message = ''
     startmov_bool=False
-    initial_bool=True
     stop_drop_roll_bool=False
     speed = Twist()
     counter=0
@@ -49,6 +48,7 @@ class GPSNode(Node):
         P=0.075
         I=0.01
         D=0.15 
+        self.initial_bool=True
         self.PID=PIDController(P,I,D)
         look_ahead=1
         look_behind=0
@@ -109,6 +109,7 @@ class GPSNode(Node):
                 self.get_logger().info('start loc: '+str(currPoi[0])+','+str(currPoi[1]))
                 our_ws=self.getPath(start_loc,goal_loc)
                 path=our_ws.path_coords
+            self.get_logger().info(string(self.initial_bool))
             zang=getzangrot(path,currPoi,self.PID,self.CTE)
             if our_ws.isNearGoal(currPoint):
                 self.speed.linear.x=0.0
